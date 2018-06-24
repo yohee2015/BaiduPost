@@ -28,33 +28,14 @@ class SendBaiduMsg():
             "Referer": "https://www.baidu.com/link?url=YGMen8KEGYwu1ZmGnlzH4CAMr8JvHM_bj-GLBWVdiWDIDZrki-J5zGgY3SUprhbDFwGwjK3bzhfx_n0E_OSUja&wd=&eqid=fb3a1b5b0002f91e000000025b2cc255",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
         }
-        '''
-            留言文字内容列表
-        '''
-        self.message = [
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 当世界从华丽到荒芜，请放心我还是你的粉丝@Dear-迪丽热巴 ",
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 就算荧光棒成了拐杖，你也依旧是我的信仰@Dear-迪丽热巴 ",
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 你在哪，心在哪。没想过如影随形，但想过永生不弃@Dear-迪丽热巴 ",
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 心疼你的心疼，感受你的感受，你的微笑是我快乐的通行号@Dear-迪丽热巴 ",
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 陪伴是最长情的告白，思念是最真心的等待@Dear-迪丽热巴 ",
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 明天太阳依旧升起，转角我们能否相遇?@Dear-迪丽热巴 ",
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 我承认我很花心，你的每个样子我都很喜欢@Dear-迪丽热巴 ",
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 你一定不知道自己的微笑，可以拯救我的全世界@Dear-迪丽热巴 ",
-            r'#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 我喜欢春天的花夏天的树秋天的风冬天的雪和每天的你',
-            r'#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 世界有万千种脸孔，偏偏却对你的笑容情有独钟。',
-            r'#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 比起天黑和鬼,我更怕你心酸皱眉',
-            r'#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 路有多长我就陪你走多远毫无怨忿绝不皱一下眉头',
-            r'#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 我想你的存在就是为了证明我并不是三分钟热度',
-            r'#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 我想把世界上最好的都给你,世界上最好的就是你',
-            r'我喜欢一种朴实🌺叫李慧珍。[br]我喜欢一种痴情🌸叫白凤九。[br]我喜欢一种任性🌷叫高雯。[br]我喜欢一种强悍💐叫关小迪。[br]我喜欢一种勇敢🌹叫公孙丽🌷。[br]我喜欢一种绝世美，叫倾城。[br]我喜欢一种活泼🌺叫楼兰公主🌹；[br]喜欢一种真实😊叫迪丽热巴·迪力木拉提！！[br]热巴，我爱你！[br]6.25 一千零一夜'
-            r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 爱上你们不是因为你们多好，只是因为某一天某一瞬间某一眼，命中注定我会爱上你@Dear-迪丽热巴",
-            r'吾心向迪，永不分离。[br]❥#迪丽热巴#&nbsp;[br]❥#迪丽热巴烈火如歌#&nbsp;[br]❥#迪丽热巴一千零一夜#&nbsp;[br]❥#迪丽热巴三生三世枕上书#&nbsp;[br]❥#迪丽热巴凌凌七#&nbsp;[br]❥#迪丽热巴白凤九#&nbsp;[br]❥#迪丽热巴刘佳音#&nbsp;[br]❥#迪丽热巴的贴吧粉绝不认输#&nbsp;[br]2018继续陪伴！@Dear-迪丽热巴'
-        ]
+
         '''
         图片目录 图片路径列表
         '''
         self.picPath=[]
         self.todayTarget=""
+        self.key = parse.urlencode({'kw': TIEBA_NAME})#目标贴吧名
+        self.createPicPath()#获取图片目录
     '''
         获取贴吧相册的所有图片
     '''
@@ -78,9 +59,9 @@ class SendBaiduMsg():
     '''
         获取百度贴吧首页帖子列表序号
     '''
-    def getList(self,kw):
+    def getList(self):
 
-        tb_ret = requests.get(self.tb_url+kw, headers=self.headers)
+        tb_ret = requests.get(self.tb_url+self.key, headers=self.headers)
         #获取的源代码里面 注释掉的内容
         result = str(tb_ret.content).replace('<!--', '')
         result = result.replace('-->', '')
@@ -112,7 +93,6 @@ class SendBaiduMsg():
         payload={
             'Content - Disposition': 'form - data;name = "file";filename = "aa.jpg"',
             'Content - Type': 'image / jpeg'
-
         }
         headers = {
             'Accept-Encoding': 'gzip, deflate',
@@ -135,16 +115,17 @@ class SendBaiduMsg():
             files={
                 'file':('aa.jpg',fr,'image/jpeg')
             }
-
             html = requests.post(url=self.uploadPicUrl, data=payload, cookies=self.cookies, headers=self.headers, files=files)
             err_no = html.json()['err_no']
             if err_no == 0:
                 pic_id_encode = html.json()['info']['pic_id_encode']
                 pic_url += '[img pic_type=0 width=560 height={}]http://imgsrc.baidu.com/forum/pic/item/'.format(height) + pic_id_encode + '.jpg[/img][br]'
                 print('图片上传成功！')
-            time.sleep(random.randint(2, 6))
-
-        self.sendMsg(pid, pic_url)
+            time.sleep(random.randint(60, 300))
+        err_no=self.sendMsg(pid, pic_url)
+        if err_no != 0:
+            print("发帖失败！休息一下！")
+            time.sleep(600)
 
     '''
        回复百度信息
@@ -152,12 +133,10 @@ class SendBaiduMsg():
        content 回复帖子的图片内容
      '''
     def sendMsg(self, pid,content=''):
-        maxm = len(self.message) - 1
-        msg = self.message[random.randint(0, maxm)]+'[br]'+content
-        #msg=content
+        msg = random.choice(MESSAGE)+'[br]'+content
         self.data2 = {
             'ie': 'utf-8',
-            'kw': '迪丽热巴',
+            'kw': TIEBA_NAME,
             'fid': '2679889',
             'tid': pid,
             'floor_num': '1741',
@@ -172,14 +151,18 @@ class SendBaiduMsg():
             '_BSK': 'JVwAV2cLBE0kGUA6TW4TAUhdZWVqFEIHC3xWCmdCdXJrEDYOXzohUVdebHVeD0gIOkEzXQ07ZyYSCFEJIhMICTVGEWVBKhdcGQJpdTsWVw0eKwZKNlBqciUCclUTeHFPTAVoYVwVEkVrRmwWRHAKd29JUVZ0AAgJJEQRZUF9QABaS2c0awdPF0o/EkNpFydicwpwVwV5aF8GAH9tRFlYHCwEfUNMcgJlECstL2cdBll0Vwl9BzkYUx4OKjl6VxRZWiIKDmwVPXAKXjEbWj8hXRZcOTI5DVdLZQosBVxqGH5uTk1BIQAGEWc7ZhMtbloSBlVnbXpRB0JbYUVKdBd8citYfSx9a2hfHAJ/bURZWBwsBH1DT3ICZRArLS9nHQZbd1cJfTYlGANYRWl1LRFXDRw9CFUxeCMjIlE3Ch8rKAgHHzs4B1hZRSpEMEcbfF41PxMEEGlCQUcjWUQ2DygZR0YXJCU/SwEbUT0CSCBHaiQ+QHwDVicjCR0fPjsLXk8NZUQwVx8kUSgwUgUMJkRJTisBHzATJRFZBEsrNjdAWV9XPhNJN0xqPD5TMRtaJiofFEFxOgFDXwsoWnNEGyJLKDAfDQEkQwhYJgdcMw0uF0IZRWl1NBRXDR5/VxdyBXNhYBxyAQFrfl0BQSgySA9eWGsSfVILPlszNxEPQzFed183HF04SWVWS0o8KzYuTANSHi4IQiBoZi1zHHIaAmt+XzhcJz4IQUtGfAZvFFYHUSk6ERYQZX9wC3NbAmRBGx9eXFN+dyITQR4eDBdWKVARNTN7ORscfHdKWwBrd0xmYj0EZHMUEjlTIn45BAAuXg0LBh1BMAwpWQZYSXV5aRdFBRB0UwYWVCAxI1l/WgB+ak5DEXF1FBwIU2sNaHZbYgozPA1EUXcUF2pgRwE8USoSAl5TIW5iHRMEDHtTF3AHf2ZkBmlfAmx2T1AEGXVID1lbaxJ/BUhgCDo='
         }
         html = requests.post(self.url2, data=self.data2, cookies=self.cookies)
-        print(html.status_code, pid, msg)
+        print(time.strftime('%Y-%m-%d %H:%M:%S'), pid, msg)
+        err_no = html.json()['err_code']
+        return err_no
+
 
 
 if __name__ == '__main__':
     sendBaiduMsg = SendBaiduMsg()
-    kw = {'kw': '迪丽热巴'}
-    key=parse.urlencode(kw)
-    #sendBaiduMsg.getPic('%E8%BF%AA%E4%B8%BD%E7%83%AD%E5%B7%B4','4646103205')
-    sendBaiduMsg.createPicPath()
-    sendBaiduMsg.getList(key)
-    #sendBaiduMsg.sendPic('5760383358')
+    sendBaiduMsg.getList()#遍历回复贴吧首页帖子
+    for i in range(TODAY_TARGET_COUNT): #回复今日目标帖子
+        time.sleep(random.randint(60, 300))
+        err_no=sendBaiduMsg.sendMsg(TODAY_TARGET_PID)
+        if err_no != 0:
+            print(time.strftime('%Y-%m-%d %H:%M:%S'),"发帖失败！休息10分钟再继续！")
+            time.sleep(600)
