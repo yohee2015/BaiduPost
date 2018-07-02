@@ -13,22 +13,26 @@ import time
 
 from PIL import Image
 from lxml import etree
+from requests.exceptions import ProxyError
+
 from config import *
 
 
 class SendBaiduMsg():
     def __init__(self):
         self.cookies = {
-            'Cookie': 'BIDUPSID=0F70BC193583F0EBE9498A6AA734A30B; PSTM=1527341051; BDUSS=VJEaVd1eDVXdlNKT0Ywc3lEWkhBcXdDcno5VDV-eTJQV2VOUDRLZ2lQejE4REJiQVFBQUFBJCQAAAAAAAAAAAEAAAC1yiMMbG92ZXh1YW45OTk5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPVjCVv1YwlbZ; STOKEN=06b5316c8108e6800496e85d066b49ec5486f0167b2cedee8ec296b62cfe24e3; TIEBA_USERTYPE=57f1b4eb083a0c6cd094a225; TIEBAUID=a320d01d8de7c7a6867d6f28; bdshare_firstime=1527347260437; BAIDUID=ACF14B89176BEA18B34CC7C4F7D4B397:FG=1; H_PS_PSSID=1441_21120_18559_22074; PSINO=2; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598; BDRCVFR[feWj1Vr5u3D]=I67x6TjHwwYf0; cflag=15%3A3; Hm_lvt_98b9d8c2fd6608d564bf2ac2ae642948=1529487237,1529583430,1529732786,1529738794; 203672245_FRSVideoUploadTip=1; wise_device=0; LONGID=203672245; Hm_lpvt_98b9d8c2fd6608d564bf2ac2ae642948=1529738900'}
+            'Cookie': 'TIEBA_USERTYPE=240918a96567254ebf3f8355; TIEBAUID=a320d01d8de7c7a6867d6f28; bdshare_firstime=1413631725940; IS_NEW_USER=902f5df63276f258243f4212; BIDUPSID=58C9AF2252A9A93794338CFD83E8AC5A; PSTM=1433404427; SEENKW=%E8%BF%AA%E4%B8%BD%E7%83%AD%E5%B7%B4; rpln_guide=1; FP_LASTTIME=1510625484114; BAIDUID=8DB1428C3092FCCB2792D6C61228EAD1:FG=1; BDUSS=VnNEpnR290NnVybER2VTBQOEFvbVF6UmhUSmZGd0JVNTNTbFV4QTZCNGV1Q0JiQVFBQUFBJCQAAAAAAAAAAAEAAAC1yiMMbG92ZXh1YW45OTk5AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4r-VoeK~laMF; STOKEN=8ed08d3421593def428f771f94ad46498a5770bd28c3a92fe13a9a5f7fb8425d; H_PS_PSSID=26525_1460_21116_26350_22160; wise_device=0; Hm_lvt_98b9d8c2fd6608d564bf2ac2ae642948=1530352873,1530438873,1530439068,1530499055; Hm_lpvt_98b9d8c2fd6608d564bf2ac2ae642948=1530499266'
+        }
         self.url2 = 'http://tieba.baidu.com/f/commit/post/add'#贴吧回复地址
         self.tb_url = 'http://tieba.baidu.com/f?fr=wwwt&' #贴吧列表地址
         self.uploadPicUrl = 'http://upload.tieba.baidu.com/upload/pic?tbs=9cb9836df73fbf60015297541300125500_1&fid=2679889' #图片上传地址
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36",
-            "Referer": "https://www.baidu.com/link?url=YGMen8KEGYwu1ZmGnlzH4CAMr8JvHM_bj-GLBWVdiWDIDZrki-J5zGgY3SUprhbDFwGwjK3bzhfx_n0E_OSUja&wd=&eqid=fb3a1b5b0002f91e000000025b2cc255",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+            "Referer": "http://tieba.baidu.com/p/5777628252",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            'X-Requested-With':'XMLHttpRequest'
         }
-
+        self.proxies=None
         '''
         图片目录 图片路径列表
         '''
@@ -50,8 +54,8 @@ class SendBaiduMsg():
                 ext = nurl.split(".")[-1];
                 purl='https://imgsa.baidu.com/forum/pic/item/'+pic_id+'.'+ext
                 print('正在下载第'+str(i+1)+'张图片...')
-                if os.path.exists('./rebapic/{}.{}'.format(pic_id, 'gif')) == False:
-                    with open('./rebapic/{}.{}'.format(pic_id, 'gif'), 'ab') as f:
+                if os.path.exists('./rebapic/{}.{}'.format(pic_id, 'jpg')) == False:
+                    with open('./rebapic/{}.{}'.format(pic_id, 'jpg'), 'ab') as f:
                         ret = requests.get(purl)
                         f.write(ret.content)
                 else:
@@ -73,7 +77,10 @@ class SendBaiduMsg():
             html = str(html).split(r'/')#获取pid 帖子ID
             for i in range(HF_COUNT):
                 time.sleep(random.randint(3, 9))
-                self.sendPic(html[-1])
+                if PIC_COUNT<1:
+                    self.sendMsg(html[-1])
+                else:
+                    self.sendPic(html[-1])
 
     '''
     生产图片地址列表
@@ -128,6 +135,19 @@ class SendBaiduMsg():
             time.sleep(600)
 
     '''
+       获取代理
+     '''
+    def getProxy(self):
+        try:
+            proxy = requests.get(PROXY_POOL_URL)
+            if proxy:
+                self.proxies={
+                    'http':'http://'+proxy.text
+                }
+        except ConnectionError:
+            return None
+
+    '''
        回复百度信息
        pid 回复帖子的序号
        content 回复帖子的图片内容
@@ -141,28 +161,45 @@ class SendBaiduMsg():
             'tid': pid,
             'floor_num': '1741',
             'rich_text': '1',
-            'tbs': '869dc267115692f21529738896',
+            'tbs': '45df411cda368c981530499316',
             'content': msg,
             'basilisk': '1',
-            'mouse_pwd': '29,29,28,4,25,29,27,25,28,33,25,4,24,4,25,4,24,4,25,4,24,4,25,4,24,4,25,4,24,33,26,16,27,30,31,33,25,30,24,24,4,17,24,24,15296568600400',
-            'mouse_pwd_t': '1529738901604',
+            'mouse_pwd': '51,62,50,43,54,48,55,48,48,14,54,43,55,43,54,43,55,43,54,43,55,43,54,43,55,43,54,43,55,14,54,63,55,50,55,14,54,49,55,55,43,62,55,55,15304992667070',
+            'mouse_pwd_t': '1530499266707',
             'mouse_pwd_isclick': '0',
             '__type__': 'reply',
-            '_BSK': 'JVwAV2cLBE0kGUA6TW4TAUhdZWVqFEIHC3xWCmdCdXJrEDYOXzohUVdebHVeD0gIOkEzXQ07ZyYSCFEJIhMICTVGEWVBKhdcGQJpdTsWVw0eKwZKNlBqciUCclUTeHFPTAVoYVwVEkVrRmwWRHAKd29JUVZ0AAgJJEQRZUF9QABaS2c0awdPF0o/EkNpFydicwpwVwV5aF8GAH9tRFlYHCwEfUNMcgJlECstL2cdBll0Vwl9BzkYUx4OKjl6VxRZWiIKDmwVPXAKXjEbWj8hXRZcOTI5DVdLZQosBVxqGH5uTk1BIQAGEWc7ZhMtbloSBlVnbXpRB0JbYUVKdBd8citYfSx9a2hfHAJ/bURZWBwsBH1DT3ICZRArLS9nHQZbd1cJfTYlGANYRWl1LRFXDRw9CFUxeCMjIlE3Ch8rKAgHHzs4B1hZRSpEMEcbfF41PxMEEGlCQUcjWUQ2DygZR0YXJCU/SwEbUT0CSCBHaiQ+QHwDVicjCR0fPjsLXk8NZUQwVx8kUSgwUgUMJkRJTisBHzATJRFZBEsrNjdAWV9XPhNJN0xqPD5TMRtaJiofFEFxOgFDXwsoWnNEGyJLKDAfDQEkQwhYJgdcMw0uF0IZRWl1NBRXDR5/VxdyBXNhYBxyAQFrfl0BQSgySA9eWGsSfVILPlszNxEPQzFed183HF04SWVWS0o8KzYuTANSHi4IQiBoZi1zHHIaAmt+XzhcJz4IQUtGfAZvFFYHUSk6ERYQZX9wC3NbAmRBGx9eXFN+dyITQR4eDBdWKVARNTN7ORscfHdKWwBrd0xmYj0EZHMUEjlTIn45BAAuXg0LBh1BMAwpWQZYSXV5aRdFBRB0UwYWVCAxI1l/WgB+ak5DEXF1FBwIU2sNaHZbYgozPA1EUXcUF2pgRwE8USoSAl5TIW5iHRMEDHtTF3AHf2ZkBmlfAmx2T1AEGXVID1lbaxJ/BUhgCDo='
+            '_BSK': 'JVwSUWcLBBpzRQNzQztCElBFNTgpUThSTT4GQSAZJDwkQnwJXCoxDllQMTgXSAYPO0kyUQ18SyIyGE0ULF9ARDJZQz4TKRhERgg1MjRABxtKIhcKKVAoNyVYfAxfJjcYER8xOAdMXgAmRnNQETNNKjsQFU8qQ01MLBsfMQAhExwCDjYjNVcMG1IiBEcxXCk+M1EiQ14sKggXUi97FEhYGiZGPlgcMUprLR0TDCldRko3BhFzQzhHElBFIyI0RgFeUSNHUipmMiI4XjdHGmk/XS5dPCMNW09JKkc7USNwRWVyXAJSZwsEXzcAVnNDIkQSUEcxJS9AWRVKf0UcZQRzY2EEaVYBcXBRV1JpdV4NTAglWzoYXDEJZWReUFV1AQgJIEQRZUF+RgFdV3BmawlXRw9vXQRgAgR1YwIkDUBsdk9QABxyVh8eXC1OawVPM1wmbUhZAHwJFR52RQdmWH9HBk9Vd3JtYVcbHD9WBH8XICU/UyQGXCdkDxRdOTgJBQNJMggEWh8kUTE7XgIMIVR5CzhXH30IfVQKShM3Ij8JV1MPb10EC2AKHHMccgMCa35fD1twFCoPBks+GX0OXB5tCxJcTUEpAwYRZQFBKgRgVF5bRX93aBVEAA54VhdpFzZicwpyOFond09XH38kVQ8QSXAYbxhcPgtlZF5TU3QGFB50RB99AH5UCkpfc2d2BxgGHHdFRCRGLzw4QzswUgUyTR9Uf3tGWhlLcwg5VRIjXWt8C1BBfxNpRD8cXzMAY0MeWkdtADNLEVhJPkdoERVwfmALcDhaJ3JJThMlYVAECig5WDNRKTVaDDcKTlZ2BgoYc1UbFCkYO3xGRyk+MUBVcFsuDElsFQU4I189Chx/dlNFHW5lVB8EUH0IDFUYMUoucUtSVGsCEglpV0BsQ3ZWRBgSIHt4UkcVBG8pcwl5ZHxzUWNNCWkiHBlAOHtGXRlLcwg5VRIjXTo='
         }
-        html = requests.post(self.url2, data=self.data2, cookies=self.cookies)
-        print(time.strftime('%Y-%m-%d %H:%M:%S'), pid, msg)
-        err_no = html.json()['err_code']
-        return err_no
+
+        print('代理服务器IP：',self.proxies)
+        try:
+            html = requests.post(self.url2, data=self.data2, cookies=self.cookies,proxies=self.proxies)
+            if html.status_code==200:
+                print(time.strftime('%Y-%m-%d %H:%M:%S'), pid, msg)
+                err_no = html.json()['err_code']
+                return err_no
+            elif html.status_code==404:
+                print('404 COOKIES已失效，请更换COOKIES')
+                return html.status_code
+            else:
+                return None
+        except ProxyError:
+            self.getProxy()
+
+
 
 
 
 if __name__ == '__main__':
     sendBaiduMsg = SendBaiduMsg()
-    sendBaiduMsg.getList()#遍历回复贴吧首页帖子
+    sendBaiduMsg.getProxy()#获取代理
+    #sendBaiduMsg.getList()#遍历回复贴吧首页帖子
     for i in range(TODAY_TARGET_COUNT): #回复今日目标帖子
-        time.sleep(random.randint(60, 300))
+        time.sleep(random.randint(36, 100))
         err_no=sendBaiduMsg.sendMsg(TODAY_TARGET_PID)
-        if err_no != 0:
+        if err_no==404:
+            os._exit()
+        elif err_no != 0:
             print(time.strftime('%Y-%m-%d %H:%M:%S'),"发帖失败！休息10分钟再继续！")
-            time.sleep(600)
+            sendBaiduMsg.getProxy()
+            time.sleep(100)

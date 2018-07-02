@@ -7,10 +7,11 @@ Created on Mon Jun 18 16:36:33 2018
 
 PIC_PATH=r'D:\Python\BaiduPost\rebapic'  # 图片目录
 HF_COUNT=1  # 每个帖子回复的次数
-PIC_COUNT=1  # 每个回复上传图片的次数
-TODAY_TARGET_PID='5763457872'#今日目标帖子ID
+PIC_COUNT=0  # 每个回复上传图片的次数
+TODAY_TARGET_PID='5777628252'#今日目标帖子ID
 TODAY_TARGET_COUNT=500 #今日目标帖子回复帖子数
 TIEBA_NAME='迪丽热巴'
+PROXY_POOL_URL='http://127.0.0.1:5555/random'
 #留言文字内容列表
 MESSAGE=[
     r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 当世界从华丽到荒芜，请放心我还是你的粉丝@Dear-迪丽热巴 ",
@@ -39,3 +40,6 @@ MESSAGE=[
     r"#迪丽热巴# #迪丽热巴一千零一夜# #迪丽热巴凌凌七# 爱上你不是因为你多好，只是因为某一天某一瞬间某一眼，命中注定我会爱上你@Dear-迪丽热巴 ",
     r'吾心向迪，永不分离。[br]❥#迪丽热巴#&nbsp;[br]❥#迪丽热巴烈火如歌#&nbsp;[br]❥#迪丽热巴一千零一夜#&nbsp;[br]❥#迪丽热巴三生三世枕上书#&nbsp;[br]❥#迪丽热巴凌凌七#&nbsp;[br]❥#迪丽热巴白凤九#&nbsp;[br]❥#迪丽热巴刘佳音#&nbsp;[br]❥#迪丽热巴的贴吧粉绝不认输#&nbsp;[br]2018继续陪伴！@Dear-迪丽热巴'
 ]
+
+rootdir = r'F:/test/'
+clsname=['CFA1402']
